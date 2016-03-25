@@ -3,6 +3,7 @@ title: 'Reproducible Research: Peer Assessment 1'
 author: "Robert Huntsman"
 date: "Friday, March 25, 2016"
 output: html_document
+keep_md: true
 ---
 
 # Loading and preprocessing the data
@@ -18,89 +19,85 @@ library(lubridate)
 library(psych)
 library(reshape)
 library(rmarkdown)
-activity <- read.csv("activity.csv",stringsAsFactors=FALSE)
-act <- na.omit(activity)
 
+activity <- read.csv("activity.csv",stringsAsFactors=FALSE)
+activity$date <- as.Date(activity$date)
 ```
 
 # What is mean number of steps taken per day?
 ```{r,echo=TRUE}
-daily_agg <- aggregate(act$steps, by = list(act$date), FUN=sum)
-names(daily_agg) <- c("date","steps")
+dailySteps <- aggregate(steps ~ date, activity, sum)
+names(dailySteps) <- c("date","steps")
+hist(dailySteps$steps,col="blue",xlab="# Steps",ylab="Frequency of Days with X Steps", main="Histogram of Total Steps by Day")
+dev.copy(png,"DailyStepHistogram.png")
+dev.off()
 
-hist(daily_agg$steps,col="blue",xlab="# Steps",ylab="Frequency of Days with X Steps", main="Histogram of Total Steps by Day")
+meanSteps<- round(mean(dailySteps$steps),0)
+medianSteps <- round(median(dailySteps$steps),0)
 
-mean_daily_steps <- mean(daily_agg$steps)
-median_daily_steps <- median(daily_agg$steps)
-
-sprintf("Mean Steps Per Day: %s", round(mean_daily_steps,0))
-sprintf("Median Steps Per Day: %s", round(median_daily_steps,0))
+sprintf("Mean Steps Per Day: %s", meanSteps)
+sprintf("Median Steps Per Day: %s", medianSteps)
 
 ```
 
 # What is the average daily activity pattern?
 ```{r, echo=TRUE}
-int_mean <- aggregate(act$steps,by=list(act$interval), FUN=mean)
-int_median <- aggregate(act$steps,by=list(act$interval), FUN=median)
-names(int_mean) <- c("interval","steps")
-names(int_median) <- c("interval","steps")
 
-xyplot(steps ~ interval,data=int_mean,type="l",col="blue", main = "Steps Per Interval (averaged)",
-       xlab = "Interval", ylab = "Steps Per Interval (averaged)")
+intMeanSteps <- aggregate(steps ~ interval, activity, mean)
+intMedianSteps <- aggregate(steps ~ interval, activity, median)
 
-max_mean_interval <- int_mean[which(int_mean$steps==max(int_mean$steps)),1]
-sprintf("Max mean step interval (on average) is interval %s", max_mean_interval)
-max_mean_daily_steps <- round(int_mean[int_mean$interval == max_mean_interval,2],0)
-sprintf("Max mean steps per interval is %s", max_mean_daily_steps)
+xyplot(steps ~ interval,data=intMeanSteps,type="l",col="blue", lwd=2, main = "Avgerage Steps Per Interval", xlab = "Interval", ylab = "Steps")
+dev.copy(png,"AverageStepsPerInterval.png")
+dev.off()
 
+maxInterval <- intMeanSteps[which(intMeanSteps$steps==max(intMeanSteps$steps)),]
+sprintf("Max Step Interval: %s", maxInterval$interval)
+sprintf("Max Steps: %s", maxInterval$steps)
 ```
 
 # Imputing missing values
 ```{r,echo=TRUE}
-n_nas <- nrow(activity[is.na(activity$steps) == TRUE,])
-sprintf("Numberof NA's in original data set is %s", n_nas)
+missing <- nrow(activity[is.na(activity$steps) == TRUE,])
+sprintf("Numberof NA's in original data set is %s", missing)
 
-activity$steps2 <- ifelse(is.na(activity$steps) == TRUE, int_mean$steps[int_mean$interval %in% activity$interval],activity$steps)
+activity$steps2 <- ifelse(is.na(activity$steps), intMeanSteps[intMeanSteps$interval == activity$interval, 2], activity$steps)
 
-new_data <- activity[,c("date","interval","steps2")]
-names(new_data) <- c("date","interval","steps")
-new_daily_agg <- aggregate(new_data$steps,by=list(new_data$date),FUN=sum)
-names(new_daily_agg) <- c("date","steps")
+dailySteps2 <- aggregate(steps2 ~ date, activity, sum)
+names(dailySteps2) <- c("date","steps")
 
-hist(new_daily_agg$steps, col="blue", main = "Histogram of Daily Average Steps with NAs Replaced")
-mean_daily_steps_2 <- mean(new_daily_agg$steps)
-median_daily_steps_2 <- mean(new_daily_agg$steps)
+hist(dailySteps2$steps, col="blue", main = "Total Daily Steps (NA's Replaced)", xlab="Daily Steps", ylab="# Days")
+dev.copy(png,"DailyStepsWithImputedNAs.png")
+dev.off()
 
-sprintf("Mean Steps Per Day, NA replaced: %s", round(mean_daily_steps_2,0))
-sprintf("Median Steps Per Day, NA replaced: %s", round(median_daily_steps_2,0))
-sprintf("Original minus new mean daily steps is: %s", 
-        round(mean_daily_steps - mean_daily_steps_2))
-sprintf("Original minus new median daily steps is: %s", 
-        round(median_daily_steps - median_daily_steps_2))
+meanDailySteps2 <- mean(dailySteps2$steps)
+medianDailySteps2 <- median(dailySteps2$steps)
+
+sprintf("Original Mean Steps Per Day: %s", meanSteps)
+sprintf("Original Median Steps Per Day: %s", medianSteps)
+sprintf("New Mean Steps Per Day, NA replaced: %s", round(meanDailySteps2,0))
+sprintf("New Median Steps Per Day, NA replaced: %s", round(medianDailySteps2,0))
+
 ```
+## The mean and median number of steps between the original and new (NA's replaced) data sets are approximately equal.  
+### The impact of imputing values for NA's is minimal.  However, the new mean and median are identical, a result
+### of replacing NA's with mean values.
 
 # Are there differences in activity patterns between weekdays and weekends?
 ```{r,echo=TRUE}
-new_data$date <- as.Date(new_data$date)
-new_data$wd_group <- ifelse(weekdays(new_data$date) %in% c("Saturday","Sunday"),"weekend","weekday")
-new_data_agg <- aggregate(new_data, by=list(new_data$interval, new_data$wd_group),FUN=mean)
-new_data_agg <- new_data_agg[,c(1,2,3,5)]
+activity$weekdayGroup <- as.factor(ifelse(weekdays(activity$date) %in% c("Saturday","Sunday"),"Weekend","Weekday"))
+weekdayIntervalSteps <- aggregate(steps2 ~ interval + weekdayGroup, activity, mean)
 
-names(new_data_agg) <- c("interval","wd_group","date","steps")
-new_data_wd <- new_data_agg[new_data_agg$wd_group =="weekday",] 
-new_data_we <- new_data_agg[new_data_agg$wd_group =="weekend",]
-wd_v_we <- data.frame(new_data_agg$interval,new_data_wd$steps - new_data_we$steps)
-names(wd_v_we) <- c("interval","weekday_less_weekend_steps")
-xyplot(weekday_less_weekend_steps ~ interval, data = wd_v_we, type = "l", col="green")
-
-
-xyplot(steps ~ interval | wd_group,
-       data = new_data_agg,
+xyplot(steps2 ~ interval | weekdayGroup,
+       data = weekdayIntervalSteps,
        type = "l",
+       layout=c(1,2),
        lty = c(1, 2, 2, 1),
-       lwd = c(1, 1, 1, 3),
+       lwd = c(2,2),
        col = c("blue"),
        main = "Average Steps Per Interval: Weekdays vs. Weekends",
-       xlab = "Daily Interval",
-       ylab = "Avg. Steps Per Interval")
+       xlab = "Interval",
+       ylab = "Average Steps Per Interval")
+
+dev.copy(png,"WeekendVsWeekdayStepsPerInterval.png")
+dev.off()
 ```
