@@ -118,16 +118,69 @@ $(document).ready(function () {
 <div id="loading-and-preprocessing-the-data" class="section level1">
 <h1>Loading and preprocessing the data</h1>
 <pre class="r"><code>setwd(&quot;C:/Users/rhuntsman/Desktop/Coursera/Reproducible Research/Project 1&quot;)
-library(ggplot2)
-library(plyr)
-library(dplyr)
-library(lattice)
-library(data.table)
-library(knitr)
-library(lubridate)
-library(psych)
-library(reshape)
-library(rmarkdown)</code></pre>
+library(ggplot2)</code></pre>
+<pre><code>## Warning: package 'ggplot2' was built under R version 3.1.3</code></pre>
+<pre class="r"><code>library(plyr)</code></pre>
+<pre><code>## Warning: package 'plyr' was built under R version 3.1.3</code></pre>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## Warning: package 'dplyr' was built under R version 3.1.3</code></pre>
+<pre><code>## 
+## Attaching package: 'dplyr'</code></pre>
+<pre><code>## The following objects are masked from 'package:plyr':
+## 
+##     arrange, count, desc, failwith, id, mutate, rename, summarise,
+##     summarize</code></pre>
+<pre><code>## The following objects are masked from 'package:stats':
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(lattice)</code></pre>
+<pre><code>## Warning: package 'lattice' was built under R version 3.1.3</code></pre>
+<pre class="r"><code>library(data.table)</code></pre>
+<pre><code>## Warning: package 'data.table' was built under R version 3.1.3</code></pre>
+<pre><code>## 
+## Attaching package: 'data.table'</code></pre>
+<pre><code>## The following objects are masked from 'package:dplyr':
+## 
+##     between, last</code></pre>
+<pre class="r"><code>library(knitr)</code></pre>
+<pre><code>## Warning: package 'knitr' was built under R version 3.1.3</code></pre>
+<pre class="r"><code>library(lubridate)</code></pre>
+<pre><code>## Warning: package 'lubridate' was built under R version 3.1.3</code></pre>
+<pre><code>## 
+## Attaching package: 'lubridate'</code></pre>
+<pre><code>## The following objects are masked from 'package:data.table':
+## 
+##     hour, mday, month, quarter, wday, week, yday, year</code></pre>
+<pre><code>## The following object is masked from 'package:plyr':
+## 
+##     here</code></pre>
+<pre class="r"><code>library(psych)</code></pre>
+<pre><code>## Warning: package 'psych' was built under R version 3.1.3</code></pre>
+<pre><code>## 
+## Attaching package: 'psych'</code></pre>
+<pre><code>## The following objects are masked from 'package:ggplot2':
+## 
+##     %+%, alpha</code></pre>
+<pre class="r"><code>library(reshape)</code></pre>
+<pre><code>## Warning: package 'reshape' was built under R version 3.1.3</code></pre>
+<pre><code>## 
+## Attaching package: 'reshape'</code></pre>
+<pre><code>## The following object is masked from 'package:lubridate':
+## 
+##     stamp</code></pre>
+<pre><code>## The following object is masked from 'package:data.table':
+## 
+##     melt</code></pre>
+<pre><code>## The following object is masked from 'package:dplyr':
+## 
+##     rename</code></pre>
+<pre><code>## The following objects are masked from 'package:plyr':
+## 
+##     rename, round_any</code></pre>
+<pre class="r"><code>library(rmarkdown)</code></pre>
 <pre><code>## Warning: package 'rmarkdown' was built under R version 3.1.3</code></pre>
 <pre class="r"><code>activity &lt;- read.csv(&quot;activity.csv&quot;,stringsAsFactors=FALSE)
 act &lt;- na.omit(activity)</code></pre>
